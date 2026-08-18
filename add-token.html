@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Add token to TronLink</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;line-height:1.6;padding:24px;max-width:800px;margin:auto}
+    code{background:#f4f4f4;padding:0.1rem 0.3rem;border-radius:4px}
+    .card{border:1px solid #eee;padding:16px;border-radius:8px;margin-top:16px}
+    img.logo{width:64px;height:64px;border-radius:8px;object-fit:contain}
+    button{background:#007bff;color:#fff;border:none;padding:12px 18px;border-radius:6px;font-size:1rem;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h1>Add token to TronLink (one click)</h1>
+  <p>This page allows you to add a token to TronLink (watchAsset) using the metadata JSON. You can open this page in the browser on your mobile device and use TronLink's "import token" or click the button below if TronLink supports the protocol.</p>
+
+  <div id="token" class="card">
+    <p>Loading token metadata…</p>
+  </div>
+
+  <div style="margin-top:18px">
+    <button id="addBtn">Open in TronLink (if supported)</button>
+  </div>
+
+  <script>
+    // Usage:
+    // The page expects a query parameter `metadata_url` pointing to a raw JSON metadata file.
+    // Example:
+    // https://<user>.github.io/<repo>/add-token.html?metadata_url=https://raw.githubusercontent.com/<user>/<repo>/<sha>/metadata-TPHjxcwu.json
+    //
+    // If metadata_url is not provided, the page will attempt to fetch metadata from a default inline object (useful for local testing).
+    (async function(){
+      function el(id){return document.getElementById(id)}
+      const params = new URLSearchParams(location.search)
+      const metadataUrl = params.get('metadata_url')
+      let metadata = null
+
+      try {
+        if (metadataUrl) {
+          const resp = await fetch(metadataUrl, {cache: 'no-store'})
+          if (!resp.ok) throw new Error('Failed to fetch metadata: ' + resp.status)
+          metadata = await resp.json()
+        } else {
+          // Default fallback — embedded metadata (for convenience)
+          metadata = {
+            "name":"Tether USD",
+            "symbol":"USDT",
+            "decimals":6,
+            "logoURI":"https://i.ibb.co/s9HhX5jP/file-00000000b53482468cb1a919f5cc14ff.png",
+            "tokenAddress":"TPHjxcwuDiAJtnySMo99ou7Rbqo8cqVhsh",
+            "network":"Mainnet"
+          }
+        }
+      } catch(e){
+        el('token').innerHTML = `<p style="color:red">Error loading metadata: ${e.message}</p>`
+        return
+      }
+
+      el('token').innerHTML = `
+        <div style="display:flex;gap:12px;align-items:center">
+          <img class="logo" src="${metadata.logoURI}" alt="${metadata.symbol} logo" onerror="this.style.display='none'"/>
+          <div>
+            <strong>${metadata.name} (${metadata.symbol})</strong><br/>
+            <small>Address: <code>${metadata.tokenAddress}</code></small><br/>
+            <small>Decimals: ${metadata.decimals}</small><br/>
+            <small>Network: ${metadata.network || 'TRON'}</small>
+          </div>
+        </div>
+      `
+
+      document.getElementById('addBtn').addEventListener('click', ()=> {
+        // Most wallets support custom deep links. TronLink desktop/mobile may not have documented universal deep link.
+        // We simply open the same page as an attempt for in-wallet browser. Users should open this page from TronLink's in-app browser.
+        window.open(location.href, '_blank')
+      })
+    })()
+  </script>
+</body>
+</html>
