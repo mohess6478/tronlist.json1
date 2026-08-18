@@ -1,0 +1,12 @@
+<!-- This SVG references an external QR generator as a fallback for display (useful if the repo has no generated PNG yet). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="360" viewBox="0 0 320 360" role="img" aria-label="QR code">
+  <style>
+    .caption { font-family: Arial, Helvetica, sans-serif; font-size:12px; fill:#333 }
+  </style>
+  <rect width="320" height="360" fill="#ffffff"/>
+  <image x="10" y="10" width="300" height="300"
+    href="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fmohess6478.github.io%2Ftronlist.json1%2Fadd-token.html%3Fmetadata_url%3Dhttps%3A%2F%2Fraw.githubusercontent.com%2Fmohess6478%2Ftronlist.json1%2Ffc3570dcf9e81c40b4c453885582a043b68ec4fd%2Fmetadata-TPHjxcwu.json"
+    />
+  <text x="10" y="332" class="caption">Scan to open "Add token" page for USDT (TRON)</text>
+  <text x="10" y="348" class="caption">Token: TPHjxcwuDiAJtnySMo99ou7Rbqo8cqVhsh</text>
+</svg>
