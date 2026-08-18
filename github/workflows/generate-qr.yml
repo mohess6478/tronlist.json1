@@ -1,0 +1,64 @@
+```yaml name=.github/workflows/generate-qr.yml
+name: Generate token QR + assets
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'metadata-*.json'
+      - 'add-token.html'
+      - '.github/workflows/generate-qr.yml'
+      - 'scripts/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # so we can push back
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install qrcode[pil]
+
+      - name: Determine repo/ref
+        id: repo
+        run: |
+          echo "repo=${GITHUB_REPOSITORY}" >> $GITHUB_OUTPUT
+          echo "ref=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Generate assets (QR, canonical metadata, link)
+        env:
+          REPO: ${{ steps.repo.outputs.repo }}
+          REF: ${{ steps.repo.outputs.ref }}
+        run: |
+          python scripts/generate_assets.py \
+            --metadata metadata-TPHjxcwu.json \
+            --repo "${REPO}" \
+            --ref "${REF}" \
+            --pages-base "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" \
+            --outdir assets
+
+      - name: Show generated files
+        run: ls -la assets || true
+
+      - name: Commit generated assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: generate QR and assets for token (auto) [skip ci]"
+            git push origin HEAD:${{ github.ref_name || github.ref }}
+          fi
+```
